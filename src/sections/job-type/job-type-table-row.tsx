@@ -26,17 +26,49 @@ export default function JobTypeTableRow({
   onDeleteRow
 }: Props) {
   const confirm = useBoolean()
-  return <>
-    <TableRow hover>
-      <TableCell>{row.id}</TableCell>
-      <TableCell>{row.name}</TableCell>
-      <TableCell>{companyName}</TableCell>
-      <TableCell>{branchName}</TableCell>
-      <TableCell align="right">
-        <Tooltip title="Editar"><IconButton onClick={onEditRow}><EditIcon /></IconButton></Tooltip>
-        <Tooltip title="Eliminar"><IconButton color="error" onClick={confirm.onTrue}><DeleteIcon /></IconButton></Tooltip>
-      </TableCell>
-    </TableRow>
-    <ConfirmDialog open={confirm.value} onClose={confirm.onFalse} title="Eliminar" content={<>¿Seguro que quieres eliminar el tipo de trabajo <strong>{row.name}</strong>?</>} action={<Button variant="contained" color="error" onClick={() => { confirm.onFalse(); onDeleteRow() }}>Eliminar</Button>} />
-  </>
+  return (
+    <>
+      <TableRow hover>
+        <TableCell>{row.id}</TableCell>
+        <TableCell>{row.name}</TableCell>
+        <TableCell>{companyName}</TableCell>
+        <TableCell>{branchName}</TableCell>
+        <TableCell align="right">
+          <Tooltip title="Editar">
+            <IconButton onClick={onEditRow}>
+              <EditIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Eliminar">
+            <IconButton color="error" onClick={confirm.onTrue}>
+              <DeleteIcon />
+            </IconButton>
+          </Tooltip>
+        </TableCell>
+      </TableRow>
+      <ConfirmDialog
+        open={confirm.value}
+        onClose={confirm.onFalse}
+        title="Eliminar"
+        content={
+          <>
+            ¿Seguro que quieres eliminar el tipo de trabajo{' '}
+            <strong>{row.name}</strong>?
+          </>
+        }
+        action={
+          <Button
+            variant="contained"
+            color="error"
+            onClick={() => {
+              confirm.onFalse()
+              onDeleteRow()
+            }}
+          >
+            Eliminar
+          </Button>
+        }
+      />
+    </>
+  )
 }

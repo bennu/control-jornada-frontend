@@ -7,11 +7,15 @@ export const allJobTypes = async (): Promise<JobTypeModel[]> => {
   return request<JobTypeModel[]>(apiUrl)
 }
 
-export const jobTypeById = async (id: string | number): Promise<JobTypeModel> => {
+export const jobTypeById = async (
+  id: string | number
+): Promise<JobTypeModel> => {
   return request<JobTypeModel>(`${apiUrl}/${id}`)
 }
 
-export const createJobType = async (jobType: JobTypeRequest): Promise<JobTypeModel> => {
+export const createJobType = async (
+  jobType: JobTypeRequest
+): Promise<JobTypeModel> => {
   return request<JobTypeModel>(apiUrl, {
     method: 'POST',
     headers: JSON_HEADERS,
@@ -19,9 +23,14 @@ export const createJobType = async (jobType: JobTypeRequest): Promise<JobTypeMod
   })
 }
 
-export const updateJobType = async (id: string | number, jobType: JobTypeRequest): Promise<JobTypeModel> => {
+export const updateJobType = async (
+  id: string | number,
+  jobType: JobTypeRequest
+): Promise<JobTypeModel> => {
   return request<JobTypeModel>(`${apiUrl}/${id}`, {
-    method: 'PUT', headers: JSON_HEADERS, body: JSON.stringify(jobType)
+    method: 'PUT',
+    headers: JSON_HEADERS,
+    body: JSON.stringify(jobType)
   })
 }
 

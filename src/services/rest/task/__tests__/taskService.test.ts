@@ -14,7 +14,6 @@ describe('taskService', () => {
   })
 
   it('allTasks devuelve la lista de tareas', async () => {
-
     const tasks: TaskModel[] = [
       { id: 1, title: 'Tarea 1', description: '', completed: false }
     ]
