@@ -13,9 +13,6 @@ import { useSnackbar } from '@/components/snackbar'
 import { getErrorMessage } from '@/helpers/API'
 import { CityRequest } from '@/model'
 import { RegionModel } from '@/model/region.model'
-import { RouterLink } from '@/routes/components'
-import { useRouter } from '@/routes/hooks'
-import { paths } from '@/routes/paths'
 import { cityById, saveCity, updateCity } from '@/services/rest'
 import { allRegions } from '@/services/rest/indexRegion'
 
@@ -23,10 +20,16 @@ import { CITY_DEFAULT_VALUES, CityFormValues, CitySchema } from './city'
 
 interface Props {
   cityId?: string
+  // el formulario vive dentro de un modal de la lista
+  onSuccess: VoidFunction
+  onCancel: VoidFunction
 }
 
-export default function CityNewEditForm({ cityId }: Props) {
-  const router = useRouter()
+export default function CityNewEditForm({
+  cityId,
+  onSuccess,
+  onCancel
+}: Props) {
   const { enqueueSnackbar } = useSnackbar()
   const [loading, setLoading] = useState(!!cityId)
   const [regions, setRegions] = useState<RegionModel[]>([])
@@ -67,14 +70,14 @@ export default function CityNewEditForm({ cityId }: Props) {
         reset({ name: city.name, regionId: city.region.id })
       } catch (error) {
         enqueueSnackbar(getErrorMessage(error), { variant: 'error' })
-        router.push(paths.city.list)
+        onCancel()
       } finally {
         setLoading(false)
       }
     }
 
     getCity()
-  }, [cityId, reset, enqueueSnackbar, router])
+  }, [cityId, reset, enqueueSnackbar, onCancel])
 
   const onSubmit = handleSubmit(async (data) => {
     // el back espera la región como objeto
@@ -91,7 +94,7 @@ export default function CityNewEditForm({ cityId }: Props) {
         await saveCity(city)
         enqueueSnackbar('Ciudad creada')
       }
-      router.push(paths.city.list)
+      onSuccess()
     } catch (error) {
       enqueueSnackbar(getErrorMessage(error), { variant: 'error' })
     }
@@ -139,12 +142,7 @@ export default function CityNewEditForm({ cityId }: Props) {
           />
 
           <Stack direction="row" spacing={2} justifyContent="flex-end">
-            <Button
-              component={RouterLink}
-              href={paths.city.list}
-              variant="outlined"
-              color="inherit"
-            >
+            <Button variant="outlined" color="inherit" onClick={onCancel}>
               Cancelar
             </Button>
             <Button type="submit" variant="contained" loading={isSubmitting}>

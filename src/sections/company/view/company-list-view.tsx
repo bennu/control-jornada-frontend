@@ -4,6 +4,8 @@ import AddIcon from '@mui/icons-material/Add'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
 import Container from '@mui/material/Container'
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableContainer from '@mui/material/TableContainer'
@@ -20,24 +22,24 @@ import {
 } from '@/components/table'
 import { getErrorMessage } from '@/helpers/API'
 import { CompanyModel } from '@/model'
-import { RouterLink } from '@/routes/components'
-import { useRouter } from '@/routes/hooks'
 import { paths } from '@/routes/paths'
 import { allCompanies, deleteCompany } from '@/services/rest'
 import { getComparator, includesText, Order } from '@/utils/table-filter'
 
 import { TABLE_HEAD } from '../company'
+import CompanyNewEditForm from '../company-new-edit-form'
 import CompanyTableRow from '../company-table-row'
 import CompanyTableToolbar from '../company-table-toolbar'
 
 export default function CompanyListView() {
-  const router = useRouter()
   const table = useTable()
   const { enqueueSnackbar } = useSnackbar()
 
   const [companyList, setCompanyList] = useState<CompanyModel[]>([])
   const [loading, setLoading] = useState(true)
   const [searchText, setSearchText] = useState('')
+  const [openCreate, setOpenCreate] = useState(false)
+  const [editId, setEditId] = useState<string>()
 
   useEffect(() => {
     const getCompanies = async () => {
@@ -95,8 +97,7 @@ export default function CompanyListView() {
         ]}
         action={
           <Button
-            component={RouterLink}
-            href={paths.company.add}
+            onClick={() => setOpenCreate(true)}
             variant="contained"
             startIcon={<AddIcon />}
           >
@@ -126,7 +127,7 @@ export default function CompanyListView() {
                   <CompanyTableRow
                     key={row.id}
                     row={row}
-                    onEditRow={() => router.push(paths.company.edit(row.id))}
+                    onEditRow={() => setEditId(String(row.id))}
                     onDeleteRow={() => handleDeleteRow(row.id)}
                   />
                 ))}
@@ -146,6 +147,41 @@ export default function CompanyListView() {
           onRowsPerPageChange={table.onChangeRowsPerPage}
         />
       </Card>
+
+      <Dialog
+        open={openCreate}
+        onClose={() => setOpenCreate(false)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>Agregar empresa</DialogTitle>
+        <CompanyNewEditForm
+          onSuccess={() => {
+            setOpenCreate(false)
+            allCompanies().then(setCompanyList)
+          }}
+          onCancel={() => setOpenCreate(false)}
+        />
+      </Dialog>
+
+      <Dialog
+        open={Boolean(editId)}
+        onClose={() => setEditId(undefined)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>Editar empresa</DialogTitle>
+        {editId && (
+          <CompanyNewEditForm
+            companyId={editId}
+            onSuccess={() => {
+              setEditId(undefined)
+              allCompanies().then(setCompanyList)
+            }}
+            onCancel={() => setEditId(undefined)}
+          />
+        )}
+      </Dialog>
     </Container>
   )
 }
