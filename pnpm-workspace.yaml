@@ -6,4 +6,5 @@ minimumReleaseAgeExclude:
   - node-releases@2.0.62
 
 allowBuilds:
+  '@parcel/watcher': true
   unrs-resolver: true
