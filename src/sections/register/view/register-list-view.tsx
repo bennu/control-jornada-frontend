@@ -55,6 +55,7 @@ export default function RegisterListView() {
   const [employees, setEmployees] = useState<EmployeeOption[]>([])
 
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [searchText, setSearchText] = useState('')
 
   // Obtener registros y empleados desde el backend
@@ -64,6 +65,7 @@ export default function RegisterListView() {
     const loadData = async () => {
       try {
         setLoading(true)
+        setLoadError(false)
 
         const [registersResponse, employeesResponse] =
           await Promise.all([
@@ -77,6 +79,8 @@ export default function RegisterListView() {
         }
       } catch (error) {
         if (!cancelled) {
+          setLoadError(true)
+
           enqueueSnackbar(getErrorMessage(error), {
             variant: 'error'
           })
@@ -137,6 +141,13 @@ export default function RegisterListView() {
     }
   }
 
+  // Mensajes personalizados para la lista de registros
+  const noDataMessage = loadError
+    ? 'Ocurrió un problema al consultar la información. Inténtalo nuevamente.'
+    : searchText.trim()
+      ? 'No se encontraron registros que coincidan con tu búsqueda. Prueba con otro nombre, código o fecha.'
+      : 'Aún no hay registros de asistencia. Cuando se registre una jornada, aparecerá aquí.'
+
   return (
     <Container maxWidth="xl">
       <CustomBreadcrumbs
@@ -178,7 +189,7 @@ export default function RegisterListView() {
                 <TableLoading colSpan={TABLE_HEAD.length} />
               )}
 
-              {!loading &&
+              {!loading && !loadError &&
                 dataInPage.map(row => (
                   <RegisterTableRow
                     key={row.id}
@@ -193,16 +204,19 @@ export default function RegisterListView() {
                   />
                 ))}
 
-              {!loading && !dataFiltered.length && (
-                <TableNoData colSpan={TABLE_HEAD.length} />
+              {!loading && (loadError || !dataFiltered.length) && (
+                <TableNoData
+                  colSpan={TABLE_HEAD.length}
+                  message={noDataMessage}
+                />
               )}
             </TableBody>
           </Table>
         </TableContainer>
 
         <TablePaginationCustom
-          count={dataFiltered.length}
-          page={table.page}
+          count={loadError ? 0 : dataFiltered.length}
+          page={loadError ? 0 : table.page}
           rowsPerPage={table.rowsPerPage}
           onPageChange={table.onChangePage}
           onRowsPerPageChange={table.onChangeRowsPerPage}
