@@ -15,9 +15,7 @@ export const ContractTypeSchema = Yup.object({
     .max(200, 'Máximo 200 caracteres')
 })
 
-export type ContractTypeFormValues = Yup.InferType<
-  typeof ContractTypeSchema
->
+export type ContractTypeFormValues = Yup.InferType<typeof ContractTypeSchema>
 
 export const CONTRACT_TYPE_DEFAULT_VALUES: ContractTypeFormValues = {
   name: ''
