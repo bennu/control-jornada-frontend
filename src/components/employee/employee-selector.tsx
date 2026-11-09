@@ -294,15 +294,36 @@ export default function EmployeeSelector({
           </Stack>
         </DialogContent>
 
+        
         <DialogActions sx={{ px: 3, pb: 3 }}>
           <Button
             variant="outlined"
-            color="inherit"
+            color="error"
             onClick={handleClose}
+            sx={{
+              borderRadius: 1.5,
+              px: 3,
+              py: 1,
+              fontWeight: 600,
+              textTransform: 'none',
+              backgroundColor: 'rgba(211, 47, 47, 0.04)',
+              borderColor: 'rgba(211, 47, 47, 0.45)',
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                backgroundColor: 'rgba(211, 47, 47, 0.10)',
+                borderColor: 'error.main'
+              },
+              '&:focus-visible': {
+                outline: '2px solid',
+                outlineColor: 'error.main',
+                outlineOffset: 2
+              }
+            }}
           >
             Cancelar
           </Button>
         </DialogActions>
+
       </Dialog>
     </>
   )

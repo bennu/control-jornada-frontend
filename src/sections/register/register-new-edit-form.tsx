@@ -416,20 +416,50 @@ if (loading) {
             </>
             )}
 
-          <Stack direction="row" spacing={2} justifyContent="flex-end">
-            <Button
-              component={RouterLink}
-              href={paths.register.list}
-              variant="outlined"
-              color="inherit"
+          
+            <Stack
+              direction="row"
+              spacing={2}
+              justifyContent="flex-end"
             >
-              Cancelar
-            </Button>
+              <Button
+                component={RouterLink}
+                href={paths.register.list}
+                variant="outlined"
+                color="error"
+                disabled={isSubmitting}
+                sx={{
+                  borderRadius: 1.5,
+                  px: 3,
+                  py: 1,
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  backgroundColor: 'rgba(211, 47, 47, 0.04)',
+                  borderColor: 'rgba(211, 47, 47, 0.45)',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    backgroundColor: 'rgba(211, 47, 47, 0.10)',
+                    borderColor: 'error.main'
+                  },
+                  '&:focus-visible': {
+                    outline: '2px solid',
+                    outlineColor: 'error.main',
+                    outlineOffset: 2
+                  }
+                }}
+              >
+                Cancelar
+              </Button>
 
-            <Button type="submit" variant="contained" loading={isSubmitting}>
-              {registerId ? 'Guardar cambios' : 'Crear registro'}
-            </Button>
-          </Stack>
+              <Button
+                type="submit"
+                variant="contained"
+                loading={isSubmitting}
+              >
+                {registerId ? 'Guardar cambios' : 'Crear registro'}
+              </Button>
+            </Stack>
+
         </Stack>
       </Card>
     </FormProvider>
