@@ -6,12 +6,10 @@ import Stack from '@mui/material/Stack'
 import MenuItem from '@mui/material/MenuItem'
 import { useEffect, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
-
 import FormProvider, { RHFTextField } from '@/components/hook-form'
 import { JustificationTypeOption } from '@/model/justification.model'
 import { useSnackbar } from '@/components/snackbar'
 import { getErrorMessage } from '@/helpers/API'
-import { RouterLink } from '@/routes/components'
 import { useRouter } from '@/routes/hooks'
 import { getAttachmentDownload } from '@/utils/attachment-download'
 import { paths } from '@/routes/paths'
@@ -21,9 +19,11 @@ import { JUSTIFICATION_DEFAULT_VALUES, JustificationFormValues, JustificationSch
 
 interface Props {
   justificationId?: string
+  onCancel?: VoidFunction
+  onSuccess?: VoidFunction
 }
 
-export default function JustificationNewEditForm({ justificationId }: Props) {
+export default function JustificationNewEditForm({ justificationId, onCancel, onSuccess }: Props) {
   const router = useRouter()
   const { enqueueSnackbar } = useSnackbar()
   const [loading, setLoading] = useState(!!justificationId)
@@ -86,7 +86,11 @@ export default function JustificationNewEditForm({ justificationId }: Props) {
         enqueueSnackbar('Justificación creada')
       }
 
-      router.push(paths.justification.list)
+      if (onSuccess) {
+        onSuccess()
+      } else {
+        router.push(paths.justification.list)
+      }
     } catch (error) {
       enqueueSnackbar('Error al guardar la justificación', { variant: 'error' })
     }
@@ -140,8 +144,8 @@ export default function JustificationNewEditForm({ justificationId }: Props) {
 
           <Stack direction="row" spacing={2} justifyContent="flex-end">
             <Button
-              component={RouterLink}
-              href={paths.justification.list}
+              onClick={() => onCancel ? onCancel() : router.push(paths.justification.list)}
+              disabled={isSubmitting || readingAttachment}
               variant="outlined"
               color="inherit"
             >

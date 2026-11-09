@@ -6,12 +6,10 @@ import Stack from '@mui/material/Stack'
 import MenuItem from '@mui/material/MenuItem'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-
 import FormProvider, { RHFTextField } from '@/components/hook-form'
 import { CountryModel } from '@/model/country.model'
 import { useSnackbar } from '@/components/snackbar'
 import { getErrorMessage } from '@/helpers/API'
-import { RouterLink } from '@/routes/components'
 import { useRouter } from '@/routes/hooks'
 import { paths } from '@/routes/paths'
 import { saveRegion, regionById, updateRegion } from '@/services/rest/indexRegion'
@@ -21,9 +19,11 @@ import { REGION_DEFAULT_VALUES, RegionFormValues, RegionSchema } from './region'
 
 interface Props {
   regionId?: string
+  onCancel?: VoidFunction
+  onSuccess?: VoidFunction
 }
 
-export default function RegionNewEditForm({ regionId }: Props) {
+export default function RegionNewEditForm({ regionId, onCancel, onSuccess }: Props) {
   const router = useRouter()
   const { enqueueSnackbar } = useSnackbar()
   const [loading, setLoading] = useState(!!regionId)
@@ -53,7 +53,7 @@ export default function RegionNewEditForm({ regionId }: Props) {
           name: region.name
         })
       } catch (error) {
-        enqueueSnackbar(getErrorMessage(error), { variant: 'error' })
+        enqueueSnackbar("No existe este registro", { variant: 'error' })
         router.push(paths.region.list)
       } finally {
         setLoading(false)
@@ -81,7 +81,11 @@ export default function RegionNewEditForm({ regionId }: Props) {
         enqueueSnackbar('Región creada')
       }
 
-      router.push(paths.region.list)
+      if (onSuccess) {
+        onSuccess()
+      } else {
+        router.push(paths.region.list)
+      }
     } catch (error) {
       enqueueSnackbar("Esta región ya existe", { variant: 'error' })
     }
@@ -109,8 +113,8 @@ export default function RegionNewEditForm({ regionId }: Props) {
 
           <Stack direction="row" spacing={2} justifyContent="flex-end">
             <Button
-              component={RouterLink}
-              href={paths.region.list}
+              onClick={() => onCancel ? onCancel() : router.push(paths.region.list)}
+              disabled={isSubmitting}
               variant="outlined"
               color="inherit"
             >

@@ -4,10 +4,13 @@ import AddIcon from '@mui/icons-material/Add'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
 import Container from '@mui/material/Container'
+import Dialog from '@mui/material/Dialog'
+import DialogContent from '@mui/material/DialogContent'
+import DialogTitle from '@mui/material/DialogTitle'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableContainer from '@mui/material/TableContainer'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import CustomBreadcrumbs from '@/components/custom-breadcrumbs'
 import { useSnackbar } from '@/components/snackbar'
@@ -20,18 +23,16 @@ import {
 } from '@/components/table'
 import { getErrorMessage } from '@/helpers/API'
 import { JustificationModel } from '@/model/justification.model'
-import { RouterLink } from '@/routes/components'
-import { useRouter } from '@/routes/hooks'
 import { paths } from '@/routes/paths'
 import { allJustifications, deleteJustification } from '@/services/rest/indexJustification'
 import { getComparator, includesText, Order } from '@/utils/table-filter'
 
 import { TABLE_HEAD } from '../justification'
+import JustificationNewEditForm from '../justification-new-edit-form'
 import JustificationTableRow from '../justification-table-row'
 import JustificationTableToolbar from '../justification-table-toolbar'
 
 export default function JustificationListView() {
-  const router = useRouter()
   const table = useTable()
   const { enqueueSnackbar } = useSnackbar()
 
@@ -39,20 +40,21 @@ export default function JustificationListView() {
   const [loading, setLoading] = useState(true)
   const [searchText, setSearchText] = useState('')
 
-  useEffect(() => {
-    const getJustifications = async () => {
-      try {
-        const response = await allJustifications() 
-        setJustificationList(response)
-      } catch (error) {
-        enqueueSnackbar(getErrorMessage(error), { variant: 'error' })
-      } finally {
-        setLoading(false)
-      }
-    }
+  const [formOpen, setFormOpen] = useState(false)
+  const [justificationId, setJustificationId] = useState<string>()
 
-    getJustifications()
+  const getJustifications = useCallback(() => {
+    allJustifications()
+      .then(setJustificationList)
+      .catch((error) => {
+        enqueueSnackbar(getErrorMessage(error), { variant: 'error' })
+      })
+      .finally(() => setLoading(false))
   }, [enqueueSnackbar])
+
+  useEffect(() => {
+    getJustifications()
+  }, [getJustifications])
 
   const dataFiltered = applyFilter({
     justificationList,
@@ -91,8 +93,10 @@ export default function JustificationListView() {
         links={[{ name: 'Justificaciones', href: paths.justification.root },{ name: 'Lista' }]}
         action={
           <Button
-            component={RouterLink}
-            href={paths.justification.add}
+            onClick={() => {
+              setJustificationId(undefined)
+              setFormOpen(true)
+            }}
             variant="contained"
             startIcon={<AddIcon />}
           >
@@ -122,7 +126,10 @@ export default function JustificationListView() {
                   <JustificationTableRow
                     key={row.id}
                     row={row}
-                    onEditRow={() => router.push(paths.justification.edit(row.id))}
+                    onEditRow={() => {
+                      setJustificationId(String(row.id))
+                      setFormOpen(true)
+                    }}
                     onDeleteRow={() => handleDeleteRow(row.id)}
                   />
                 ))}
@@ -142,6 +149,32 @@ export default function JustificationListView() {
           onRowsPerPageChange={table.onChangeRowsPerPage}
         />
       </Card>
+
+      <Dialog
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        fullWidth
+        maxWidth="sm"
+        aria-labelledby="justification-form-title"
+      >
+        <DialogTitle id="justification-form-title">
+          {justificationId ? 'Editar justificación' : 'Nueva justificación'}
+        </DialogTitle>
+        <DialogContent sx={{ p: 0 }}>
+          {formOpen && (
+            <JustificationNewEditForm
+              justificationId={justificationId}
+              onCancel={() => setFormOpen(false)}
+              onSuccess={() => {
+                setFormOpen(false)
+                if (!justificationId) table.onResetPage()
+                setLoading(true)
+                getJustifications()
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </Container>
   )
 }

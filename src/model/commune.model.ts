@@ -8,9 +8,9 @@ export interface CommuneModel {
   name: string
   siiCode?: string
   tgrCode?: string
-  city?: Omit<CityModel, 'regionId'>
-  region?: Omit<RegionModel, 'countryId'>
-  country?: Omit<CountryModel, 'nationality'>
+  city: Omit<CityModel, 'region' | 'regionId'>
+  region: Omit<RegionModel, 'country' | 'countryId'>
+  country: Omit<CountryModel, 'nationality'>
 }
 
 export type CommuneRequestCreate = Omit<CommuneModel, 'id' | 'city' | 'region' | 'country'>

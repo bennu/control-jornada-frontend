@@ -4,6 +4,8 @@ import AddIcon from '@mui/icons-material/Add'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
 import Container from '@mui/material/Container'
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableContainer from '@mui/material/TableContainer'
@@ -20,24 +22,24 @@ import {
 } from '@/components/table'
 import { getErrorMessage } from '@/helpers/API'
 import { CityModel } from '@/model'
-import { RouterLink } from '@/routes/components'
-import { useRouter } from '@/routes/hooks'
 import { paths } from '@/routes/paths'
 import { allCities, deleteCity } from '@/services/rest'
 import { getComparator, includesText, Order } from '@/utils/table-filter'
 
 import { TABLE_HEAD } from '../city'
+import CityNewEditForm from '../city-new-edit-form'
 import CityTableRow from '../city-table-row'
 import CityTableToolbar from '../city-table-toolbar'
 
 export default function CityListView() {
-  const router = useRouter()
   const table = useTable()
   const { enqueueSnackbar } = useSnackbar()
 
   const [cityList, setCityList] = useState<CityModel[]>([])
   const [loading, setLoading] = useState(true)
   const [searchText, setSearchText] = useState('')
+  const [openCreate, setOpenCreate] = useState(false)
+  const [editId, setEditId] = useState<string>()
 
   useEffect(() => {
     const getCities = async () => {
@@ -91,8 +93,7 @@ export default function CityListView() {
         links={[{ name: 'Ciudades', href: paths.city.root }, { name: 'Lista' }]}
         action={
           <Button
-            component={RouterLink}
-            href={paths.city.add}
+            onClick={() => setOpenCreate(true)}
             variant="contained"
             startIcon={<AddIcon />}
           >
@@ -122,7 +123,7 @@ export default function CityListView() {
                   <CityTableRow
                     key={row.id}
                     row={row}
-                    onEditRow={() => router.push(paths.city.edit(row.id))}
+                    onEditRow={() => setEditId(String(row.id))}
                     onDeleteRow={() => handleDeleteRow(row.id)}
                   />
                 ))}
@@ -142,6 +143,41 @@ export default function CityListView() {
           onRowsPerPageChange={table.onChangeRowsPerPage}
         />
       </Card>
+
+      <Dialog
+        open={openCreate}
+        onClose={() => setOpenCreate(false)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>Agregar ciudad</DialogTitle>
+        <CityNewEditForm
+          onSuccess={() => {
+            setOpenCreate(false)
+            allCities().then(setCityList)
+          }}
+          onCancel={() => setOpenCreate(false)}
+        />
+      </Dialog>
+
+      <Dialog
+        open={Boolean(editId)}
+        onClose={() => setEditId(undefined)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>Editar ciudad</DialogTitle>
+        {editId && (
+          <CityNewEditForm
+            cityId={editId}
+            onSuccess={() => {
+              setEditId(undefined)
+              allCities().then(setCityList)
+            }}
+            onCancel={() => setEditId(undefined)}
+          />
+        )}
+      </Dialog>
     </Container>
   )
 }

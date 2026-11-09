@@ -30,7 +30,7 @@ export const createCommune = async (
     headers: JSON_HEADERS,
     body: JSON.stringify(commune)
   })
-  return handleResponse<CommuneModel>(response)
+  return handleResponse<CommuneWriteResponse>(response)
 }
 
 export const updateCommune = async (
@@ -41,7 +41,7 @@ export const updateCommune = async (
     headers: JSON_HEADERS,
     body: JSON.stringify(commune)
   })
-  return handleResponse<CommuneModel>(response)
+  return handleResponse<CommuneWriteResponse>(response)
 }
 
 export const deleteCommune = async (

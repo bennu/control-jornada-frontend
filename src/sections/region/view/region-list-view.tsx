@@ -4,10 +4,13 @@ import AddIcon from '@mui/icons-material/Add'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
 import Container from '@mui/material/Container'
+import Dialog from '@mui/material/Dialog'
+import DialogContent from '@mui/material/DialogContent'
+import DialogTitle from '@mui/material/DialogTitle'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableContainer from '@mui/material/TableContainer'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import CustomBreadcrumbs from '@/components/custom-breadcrumbs'
 import { useSnackbar } from '@/components/snackbar'
@@ -20,18 +23,16 @@ import {
 } from '@/components/table'
 import { getErrorMessage } from '@/helpers/API'
 import { RegionModel } from '@/model/region.model'
-import { RouterLink } from '@/routes/components'
-import { useRouter } from '@/routes/hooks'
 import { paths } from '@/routes/paths'
 import { allRegions, deleteRegion } from '@/services/rest/indexRegion'
 import { getComparator, includesText, Order } from '@/utils/table-filter'
 
 import { TABLE_HEAD } from '../region'
+import RegionNewEditForm from '../region-new-edit-form'
 import RegionTableRow from '../region-table-row'
 import RegionTableToolbar from '../region-table-toolbar'
 
 export default function RegionListView() {
-  const router = useRouter()
   const table = useTable()
   const { enqueueSnackbar } = useSnackbar()
 
@@ -39,20 +40,21 @@ export default function RegionListView() {
   const [loading, setLoading] = useState(true)
   const [searchText, setSearchText] = useState('')
 
-  useEffect(() => {
-    const getRegions = async () => {
-      try {
-        const response = await allRegions() 
-        setRegionList(response)
-      } catch (error) {
-        enqueueSnackbar(getErrorMessage(error), { variant: 'error' })
-      } finally {
-        setLoading(false)
-      }
-    }
+  const [formOpen, setFormOpen] = useState(false)
+  const [regionId, setRegionId] = useState<string>()
 
-    getRegions()
+  const getRegions = useCallback(() => {
+    allRegions()
+      .then(setRegionList)
+      .catch((error) => {
+        enqueueSnackbar(getErrorMessage(error), { variant: 'error' })
+      })
+      .finally(() => setLoading(false))
   }, [enqueueSnackbar])
+
+  useEffect(() => {
+    getRegions()
+  }, [getRegions])
 
   const dataFiltered = applyFilter({
     regionList,
@@ -91,8 +93,10 @@ export default function RegionListView() {
         links={[{ name: 'Regiones', href: paths.region.root },{ name: 'Lista' }]}
         action={
           <Button
-            component={RouterLink}
-            href={paths.region.add}
+            onClick={() => {
+              setRegionId(undefined)
+              setFormOpen(true)
+            }}
             variant="contained"
             startIcon={<AddIcon />}
           >
@@ -123,7 +127,10 @@ export default function RegionListView() {
                     key={row.id}
                     row={row}
                     countryName={row.country.name}
-                    onEditRow={() => router.push(paths.region.edit(row.id))}
+                    onEditRow={() => {
+                      setRegionId(String(row.id))
+                      setFormOpen(true)
+                    }}
                     onDeleteRow={() => handleDeleteRow(row.id)}
                   />
                 ))}
@@ -143,6 +150,32 @@ export default function RegionListView() {
           onRowsPerPageChange={table.onChangeRowsPerPage}
         />
       </Card>
+
+      <Dialog
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        fullWidth
+        maxWidth="sm"
+        aria-labelledby="region-form-title"
+      >
+        <DialogTitle id="region-form-title">
+          {regionId ? 'Editar región' : 'Nueva región'}
+        </DialogTitle>
+        <DialogContent sx={{ p: 0 }}>
+          {formOpen && (
+            <RegionNewEditForm
+              regionId={regionId}
+              onCancel={() => setFormOpen(false)}
+              onSuccess={() => {
+                setFormOpen(false)
+                if (!regionId) table.onResetPage()
+                setLoading(true)
+                getRegions()
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </Container>
   )
 }
