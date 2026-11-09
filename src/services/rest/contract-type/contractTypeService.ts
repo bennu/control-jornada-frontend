@@ -1,8 +1,5 @@
 import { JSON_HEADERS, request } from '@/helpers/API'
-import {
-  ContractTypeModel,
-  ContractTypeRequest
-} from '@/model'
+import { ContractTypeModel, ContractTypeRequest } from '@/model'
 
 const apiUrl = `${process.env.BASE_URL_API}/v1/template/contract-type`
 
@@ -16,7 +13,9 @@ export const contractTypeById = async (
   return request<ContractTypeModel>(`${apiUrl}/${id}`)
 }
 
-export const createContractType = async (contractType: ContractTypeRequest): Promise<ContractTypeModel> => {
+export const createContractType = async (
+  contractType: ContractTypeRequest
+): Promise<ContractTypeModel> => {
   return request<ContractTypeModel>(apiUrl, {
     method: 'POST',
     headers: JSON_HEADERS,
@@ -24,9 +23,14 @@ export const createContractType = async (contractType: ContractTypeRequest): Pro
   })
 }
 
-export const updateContractType = async (id: string | number, contractType: ContractTypeRequest): Promise<ContractTypeModel> => {
+export const updateContractType = async (
+  id: string | number,
+  contractType: ContractTypeRequest
+): Promise<ContractTypeModel> => {
   return request<ContractTypeModel>(`${apiUrl}/${id}`, {
-    method: 'PUT', headers: JSON_HEADERS, body: JSON.stringify(contractType)
+    method: 'PUT',
+    headers: JSON_HEADERS,
+    body: JSON.stringify(contractType)
   })
 }
 

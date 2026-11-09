@@ -36,10 +36,7 @@ export const paths = {
 
   contractType: {
     root: `${ROOTS.CONTRACT_TYPE}/list`,
-    list: `${ROOTS.CONTRACT_TYPE}/list`,
-    add: `${ROOTS.CONTRACT_TYPE}/add`,
-    edit: (id: string | number) =>
-      `${ROOTS.CONTRACT_TYPE}/add/${id}`
+    list: `${ROOTS.CONTRACT_TYPE}/list`
   },
 
   country: {
@@ -65,16 +62,12 @@ export const paths = {
 
   branch: {
     root: `${ROOTS.BRANCH}/list`,
-    list: `${ROOTS.BRANCH}/list`,
-    add: `${ROOTS.BRANCH}/add`,
-    edit: (id: string | number) => `${ROOTS.BRANCH}/add/${id}`
+    list: `${ROOTS.BRANCH}/list`
   },
 
   jobType: {
     root: `${ROOTS.JOB_TYPE}/list`,
-    list: `${ROOTS.JOB_TYPE}/list`,
-    add: `${ROOTS.JOB_TYPE}/add`,
-    edit: (id: string | number) => `${ROOTS.JOB_TYPE}/add/${id}`
+    list: `${ROOTS.JOB_TYPE}/list`
   },
 
   region: {
