@@ -11,43 +11,47 @@ export const TABLE_HEAD: TableHeadItem[] = [
   { id: '', width: 110, align: 'right' }
 ]
 
-// esquema de una FK: { id, name? }. Validamos que venga el id.
 const refSchema = Yup.object({
   id: Yup.number().required(),
   name: Yup.string()
 })
 
+// FK obligatoria: debe venir un objeto con id (null no es válido)
+const requiredRef = (message: string) =>
+  refSchema
+    .nullable()
+    .test('required-ref', message, (value) => !!value && value.id != null)
+
 export const EmployeeSchema = Yup.object({
-  // Datos personales
   code: Yup.string().trim().required('El código es obligatorio').max(20, 'Máximo 20 caracteres'),
   name: Yup.string().trim().required('El nombre es obligatorio').max(200, 'Máximo 200 caracteres'),
   lastName: Yup.string()
     .trim()
     .required('El apellido paterno es obligatorio')
     .max(200, 'Máximo 200 caracteres'),
+  address: Yup.string()
+    .trim()
+    .required('La dirección es obligatoria')
+    .max(500, 'Máximo 500 caracteres'),
+
   motherLastName: Yup.string().max(200, 'Máximo 200 caracteres').default(''),
-  birthDate: Yup.string().required('La fecha de nacimiento es obligatoria'),
-
-  // Contacto
-  email: Yup.string().trim().email('Correo inválido').required('El correo es obligatorio'),
+  birthDate: Yup.string().default(''),
+  email: Yup.string().email('Correo inválido').default(''),
   phone: Yup.string().max(20, 'Máximo 20 caracteres').default(''),
-  address: Yup.string().max(255, 'Máximo 255 caracteres').default(''),
+  contractDate: Yup.string().default(''),
+  contractEndDate: Yup.string().default(''),
 
-  // Contrato
-  contractDate: Yup.string().required('La fecha de contratación es obligatoria'),
-  contractEndDate: Yup.string().nullable().default(null),
+  // FK obligatorias (NOT NULL): null dispara error
+  gender: requiredRef('El género es obligatorio'),
+  maritalStatus: requiredRef('El estado civil es obligatorio'),
+  jobType: requiredRef('El tipo de puesto es obligatorio'),
+  country: requiredRef('La nacionalidad es obligatoria'),
+  branch: requiredRef('La sede es obligatoria'),
+  commune: requiredRef('La comuna es obligatoria'),
+  jobScheduler: requiredRef('El horario es obligatorio'),
 
-  // Clasificación (dropdowns)
-  gender: refSchema.required('El género es obligatorio').nullable(),
-  maritalStatus: refSchema.required('El estado civil es obligatorio').nullable(),
-  jobType: refSchema.required('El tipo de puesto es obligatorio').nullable(),
-  contractType: refSchema.nullable().default(null),
-
-  // Relaciones grandes (modal)
-  country: refSchema.required('La nacionalidad es obligatoria').nullable(),
-  branch: refSchema.required('La sede es obligatoria').nullable(),
-  commune: refSchema.required('La comuna es obligatoria').nullable(),
-  jobScheduler: refSchema.required('El horario es obligatorio').nullable()
+  // FK opcional (NULL en BD)
+  contractType: refSchema.nullable().default(null)
 })
 
 export type EmployeeFormValues = Yup.InferType<typeof EmployeeSchema>
@@ -56,13 +60,13 @@ export const EMPLOYEE_DEFAULT_VALUES: EmployeeFormValues = {
   code: '',
   name: '',
   lastName: '',
+  address: '',
   motherLastName: '',
   birthDate: '',
   email: '',
   phone: '',
-  address: '',
   contractDate: '',
-  contractEndDate: null,
+  contractEndDate: '',
   gender: null,
   maritalStatus: null,
   jobType: null,

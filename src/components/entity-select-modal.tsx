@@ -9,7 +9,6 @@ import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
-import IconButton from '@mui/material/IconButton'
 import InputAdornment from '@mui/material/InputAdornment'
 import ListItemButton from '@mui/material/ListItemButton'
 import Stack from '@mui/material/Stack'
@@ -17,22 +16,20 @@ import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { useMemo, useState } from 'react'
 
-import { RefModel } from '@/model/employee.model'
-
-interface Props {
+interface Props<T extends { id: number; name?: string }> {
   open: boolean
   title: string
-  options: RefModel[]
+  options: T[]
   selectedId?: number
   // funcion opcional para el subtitulo de cada item (ej: codigo, uuid)
-  getSubtitle?: (option: RefModel) => string
+  getSubtitle?: (option: T) => string
   onClose: VoidFunction
-  onSelect: (option: RefModel) => void
+  onSelect: (option: T) => void
 }
 
 // Modal de seleccion reutilizable con busqueda.
 // Sirve para cualquier catalogo (nacionalidad, sede, comuna, etc.).
-export default function EntitySelectModal({
+export default function EntitySelectModal<T extends { id: number; name?: string }>({
   open,
   title,
   options,
@@ -40,7 +37,7 @@ export default function EntitySelectModal({
   getSubtitle,
   onClose,
   onSelect
-}: Props) {
+}: Props<T>) {
   const [search, setSearch] = useState('')
 
   const filtered = useMemo(() => {
@@ -52,7 +49,7 @@ export default function EntitySelectModal({
     })
   }, [options, search, getSubtitle])
 
-  const handleSelect = (option: RefModel) => {
+  const handleSelect = (option: T) => {
     onSelect(option)
     setSearch('')
     onClose()

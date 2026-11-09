@@ -18,20 +18,20 @@ import { RouterLink } from '@/routes/components'
 import { useRouter } from '@/routes/hooks'
 import { paths } from '@/routes/paths'
 import {
-  BranchModel,CommuneModel,ContractTypeModel,
-  CountryModel,EmployeeRequest,GenderModel,
-  JobSchedulerModel,JobTypeModel,MaritalStatusModel
+  BranchModel, CommuneModel, ContractTypeModel,
+  CountryModel, EmployeeRequest, GenderModel,
+  JobSchedulerModel, JobTypeModel, MaritalStatusModel
 } from '@/model'
 import {
-  employeeById,saveEmployee,updateEmployee, 
+  employeeById, saveEmployee, updateEmployee
 } from '@/services/rest/employee/employee'
 import { allMaritalStatus } from '@/services/rest/maritalStatus/maritalStatus'
 import { allCountries } from '@/services/rest/country/countryService'
 import EntitySelectField from '@/components/entity-select-field'
 import { EMPLOYEE_DEFAULT_VALUES, EmployeeFormValues, EmployeeSchema } from './employee'
-import { allBranches, allCommunes, allContractTypes, allJobTypes } from '@/services/rest';
-import { allGenders } from '@/services/rest/gender/gender';
-import { allJobSchedulers } from '@/services/rest/job-scheduler/job-scheduler';
+import { allBranches, allCommunes, allContractTypes, allJobTypes } from '@/services/rest'
+import { allGenders } from '@/services/rest/gender/gender'
+import { allJobSchedulers } from '@/services/rest/job-scheduler/job-scheduler'
 
 interface Props {
   employeeId?: string
@@ -46,12 +46,18 @@ interface Catalogs {
   jobTypes: JobTypeModel[]
   countries: CountryModel[]
   branches: BranchModel[]
-  communes: Pick<CommuneModel, 'id' | 'name'>[]
+  communes: CommuneModel[]
   jobSchedulers: JobSchedulerModel[]
 }
 
 // para campos de fecha: mantiene la etiqueta arriba
 const dateProps = { slotProps: { inputLabel: { shrink: true } } }
+
+// al ENVIAR: '' o solo espacios -> null; si hay texto lo devuelve con trim
+const emptyToNull = (v?: string | null) => {
+  const t = v?.trim()
+  return t ? t : null
+}
 
 export default function EmployeeNewEditForm({ employeeId, onSuccess, onCancel }: Props) {
   const router = useRouter()
@@ -89,16 +95,18 @@ export default function EmployeeNewEditForm({ employeeId, onSuccess, onCancel }:
         if (employeeId) {
           const employee = await employeeById(employeeId)
           reset({
+            // textos: null del backend -> '' solo para el input
             code: employee.code ?? '',
             name: employee.name ?? '',
             lastName: employee.lastName ?? '',
+            address: employee.address ?? '',
             motherLastName: employee.motherLastName ?? '',
             birthDate: employee.birthDate ?? '',
             email: employee.email ?? '',
             phone: employee.phone ?? '',
-            address: employee.address ?? '',
             contractDate: employee.contractDate ?? '',
-            contractEndDate: employee.contractEndDate ?? null,
+            contractEndDate: employee.contractEndDate ?? '',
+            // relaciones
             branch: employee.branch ?? null,
             jobScheduler: employee.jobScheduler ?? null,
             commune: employee.commune ?? null,
@@ -119,29 +127,33 @@ export default function EmployeeNewEditForm({ employeeId, onSuccess, onCancel }:
     }
 
     load()
-  }, [employeeId, reset, enqueueSnackbar, router])
+  }, [employeeId, reset, enqueueSnackbar, router, onCancel])
 
   const onSubmit = handleSubmit(async (data) => {
     try {
       const payload: EmployeeRequest = {
+        // obligatorios (ya con trim por el schema)
         code: data.code,
         name: data.name,
         lastName: data.lastName,
-        motherLastName: data.motherLastName || undefined,
-        birthDate: data.birthDate,
-        email: data.email,
-        phone: data.phone || undefined,
-        address: data.address || undefined,
-        contractDate: data.contractDate,
-        contractEndDate: data.contractEndDate || null,
-        branch: data.branch ? { id: data.branch.id } : undefined,
-        jobScheduler: data.jobScheduler ? { id: data.jobScheduler.id } : undefined,
-        commune: data.commune ? { id: data.commune.id } : undefined,
-        country: data.country ? { id: data.country.id } : undefined,
-        gender: data.gender ? { id: data.gender.id } : undefined,
-        maritalStatus: data.maritalStatus ? { id: data.maritalStatus.id } : undefined,
+        address: data.address,
+        // opcionales: vacío/espacios -> null
+        motherLastName: emptyToNull(data.motherLastName),
+        birthDate: emptyToNull(data.birthDate),
+        email: emptyToNull(data.email),
+        phone: emptyToNull(data.phone),
+        contractDate: emptyToNull(data.contractDate),
+        contractEndDate: emptyToNull(data.contractEndDate),
+        // FK obligatorias: yup ya garantizó que no son null
+        branch: { id: data.branch!.id },
+        jobScheduler: { id: data.jobScheduler!.id },
+        commune: { id: data.commune!.id },
+        country: { id: data.country!.id },
+        gender: { id: data.gender!.id },
+        maritalStatus: { id: data.maritalStatus!.id },
+        jobType: { id: data.jobType!.id },
+        // FK opcional
         contractType: data.contractType ? { id: data.contractType.id } : undefined,
-        jobType: data.jobType ? { id: data.jobType.id } : undefined,
         active: true
       }
 
@@ -210,13 +222,14 @@ export default function EmployeeNewEditForm({ employeeId, onSuccess, onCancel }:
     <Controller
       name={name}
       control={control}
-      render={({ field }) => (
+      render={({ field, fieldState }) => (
         <EntitySelectField
           label={label}
           modalTitle={modalTitle}
           options={options}
           value={(field.value as { id: number; name?: string } | null) ?? undefined}
           required={required}
+          error={fieldState.error?.message}
           onChange={(opt) => field.onChange(opt)}
         />
       )}
@@ -246,7 +259,7 @@ export default function EmployeeNewEditForm({ employeeId, onSuccess, onCancel }:
               <RHFTextField name="motherLastName" label="Apellido materno" />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <RHFTextField name="birthDate" label="Fecha de nacimiento" type="date" required {...dateProps} />
+              <RHFTextField name="birthDate" label="Fecha de nacimiento" type="date" {...dateProps} />
             </Grid>
           </Grid>
 
@@ -259,13 +272,13 @@ export default function EmployeeNewEditForm({ employeeId, onSuccess, onCancel }:
 
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <RHFTextField name="email" label="Correo" required />
+              <RHFTextField name="email" label="Correo" />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <RHFTextField name="phone" label="Teléfono" />
             </Grid>
             <Grid size={{ xs: 12 }}>
-              <RHFTextField name="address" label="Dirección" />
+              <RHFTextField name="address" label="Dirección" required />
             </Grid>
           </Grid>
 
@@ -278,7 +291,7 @@ export default function EmployeeNewEditForm({ employeeId, onSuccess, onCancel }:
 
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <RHFTextField name="contractDate" label="Fecha de contratación" type="date" required {...dateProps} />
+              <RHFTextField name="contractDate" label="Fecha de contratación" type="date" {...dateProps} />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <RHFTextField name="contractEndDate" label="Fin de contrato" type="date" {...dateProps} />

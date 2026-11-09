@@ -1,33 +1,31 @@
+import { BranchModel } from './branch.model'
+import { CommuneModel } from './commune.model'
+import { ContractTypeModel } from './contract-type.model'
+import { CountryModel } from './country.model'
+import { GenderModel } from './gender.model'
+import { JobSchedulerModel } from './job-scheduler.model'
+import { JobTypeModel } from './job-type.model'
+import { MaritalStatusModel } from './marital-status.model'
 
-import type { BranchModel } from './branch.model'
-import type { CommuneModel } from './commune.model'
-import type { ContractTypeModel } from './contract-type.model'
-import type { CountryModel } from './country.model'
-import type { GenderModel } from './gender.model'
-import type { JobSchedulerModel } from './job-scheduler.model'
-import type { JobTypeModel } from './job-type.model'
-import type { MaritalStatusModel } from './marital-status.model'
-
-// Modelo completo de empleados (main)
 export interface EmployeeModel {
   id: number
-  uuid?: string
+  uuid?: string | null
   code: string
   name: string
   lastName: string
-  motherLastName?: string
-  address?: string
-  email?: string
-  phone?: string
-  birthDate?: string
-  contractDate?: string
+  motherLastName?: string | null
+  address: string // NOT NULL
+  email?: string | null
+  phone?: string | null
+  birthDate?: string | null
+  contractDate?: string | null
   contractEndDate?: string | null
   active?: boolean
   inUse?: boolean
 
   branch?: BranchModel
   jobScheduler?: JobSchedulerModel
-  commune?: Pick<CommuneModel, 'id' | 'name'>
+  commune?: CommuneModel
   country?: CountryModel
   gender?: GenderModel
   maritalStatus?: MaritalStatusModel
@@ -35,26 +33,25 @@ export interface EmployeeModel {
   jobType?: JobTypeModel
 }
 
-// Modelo para enviar datos al backend (main)
 export interface EmployeeRequest {
   code: string
   name: string
   lastName: string
-  motherLastName?: string
-  birthDate?: string
-  email?: string
-  phone?: string
-  address?: string
-  contractDate?: string
+  address: string
+  motherLastName?: string | null
+  birthDate?: string | null
+  email?: string | null
+  phone?: string | null
+  contractDate?: string | null
   contractEndDate?: string | null
-  branch?: { id: number }
-  jobScheduler?: { id: number }
-  commune?: { id: number }
-  country?: { id: number }
-  gender?: { id: number }
-  maritalStatus?: { id: number }
+  branch: { id: number }
+  jobScheduler: { id: number }
+  commune: { id: number }
+  country: { id: number }
+  gender: { id: number }
+  maritalStatus: { id: number }
+  jobType: { id: number }
   contractType?: { id: number }
-  jobType?: { id: number }
   active?: boolean
 }
 

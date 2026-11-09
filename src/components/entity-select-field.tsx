@@ -14,6 +14,7 @@ interface Props<T extends { id: number; name?: string }> {
   options: T[]
   value?: T
   required?: boolean
+  error?: string
   getSubtitle?: (option: T) => string
   onChange: (option: T) => void
 }
@@ -26,6 +27,7 @@ export default function EntitySelectField<T extends { id: number; name?: string 
   options,
   value,
   required,
+  error,
   getSubtitle,
   onChange
 }: Props<T>) {
@@ -33,7 +35,11 @@ export default function EntitySelectField<T extends { id: number; name?: string 
 
   return (
     <Box>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+      <Typography
+        variant="body2"
+        color={error ? 'error' : 'text.secondary'}
+        sx={{ mb: 0.5 }}
+      >
         {label} {required && <span style={{ color: 'red' }}>*</span>}
       </Typography>
 
@@ -43,7 +49,7 @@ export default function EntitySelectField<T extends { id: number; name?: string 
         justifyContent="space-between"
         sx={{
           border: '1px solid',
-          borderColor: 'divider',
+          borderColor: error ? 'error.main' : 'divider',
           borderRadius: 1,
           px: 1.5,
           py: 1
@@ -56,6 +62,12 @@ export default function EntitySelectField<T extends { id: number; name?: string 
           {value ? 'Cambiar' : 'Seleccionar'}
         </Button>
       </Stack>
+
+      {error && (
+        <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.5, display: 'block' }}>
+          {error}
+        </Typography>
+      )}
 
       <EntitySelectModal
         open={open}
