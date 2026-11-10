@@ -1,5 +1,5 @@
 import { JustificationTypeModel } from '@/model'
-import { allJustificationTypes, createJustificationType, deleteJustificationType, updateJustificationType } from '../justification-type-service'
+import { allJustificationTypes, createJustificationType, deleteJustificationType, justificationTypeById, updateJustificationType } from '../justification-type-service'
 
 const mockFetch = jest.fn()
 global.fetch = mockFetch
@@ -30,10 +30,10 @@ describe('justTypeService', () => {
     const justType: JustificationTypeModel = { id: 1, name: "Descanso médico" }
     mockFetch.mockResolvedValue(jsonResponse(justType))
 
-    const result = await allJustificationTypes()
+    const result = await justificationTypeById(justType.id)
 
     expect(result).toEqual(justType)
-    expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('/justification-type'))
+    expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining(`/justification-type/${justType.id}`))
   })
 
   it('createJustificationType envía un POST con el tipo en el body', async () => {

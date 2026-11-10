@@ -1,5 +1,5 @@
 import { CommuneModel, CommuneRequestCreate, CommuneRequestUpdate, CommuneWriteResponse } from '@/model'
-import { allCommunes, createCommune, deleteCommune, updateCommune } from '../commune-service'
+import { allCommunes, communeById, createCommune, deleteCommune, updateCommune } from '../commune-service'
 
 const mockFetch = jest.fn()
 global.fetch = mockFetch
@@ -38,10 +38,10 @@ describe('communeService', () => {
     }
     mockFetch.mockResolvedValue(jsonResponse(commune))
 
-    const result = await allCommunes()
+    const result = await communeById(commune.id)
 
     expect(result).toEqual(commune)
-    expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('/commune'))
+    expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining(`/commune/${commune.id}`))
   })
 
   it('createCommune envía un POST con la comuna en el body', async () => {
